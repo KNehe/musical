@@ -1,3 +1,10 @@
-from django.shortcuts import render
+from rest_framework import generics
 
-# Create your views here.
+from musicals.models import Musical
+from musicals.serializers import MusicalSerializer
+
+
+class MusicalRetrieveAPIView(generics.RetrieveAPIView):
+    queryset = Musical.objects.all()
+    serializer_class = MusicalSerializer
+    lookup_field = "iswc"
