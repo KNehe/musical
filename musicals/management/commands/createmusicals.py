@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import csv
 
-from musicals.models import Musical
+from musicals.models import Contributor, Musical
 
 
 class Command(BaseCommand):
@@ -36,10 +36,17 @@ class Command(BaseCommand):
 
                 self.stdout.write("Creating musical objects...")
                 for k, v in matched_data.items():
-                    musical = Musical(contributors=",".join(v[1]), title=v[0], iswc=k)
-                    musicals.append(musical)
+                    musical, _ = Musical.objects.get_or_create(title=v[0], iswc=k)
+                    for contributor_name in v[1]:
+                        contributor, _ = Contributor.objects.get_or_create(
+                            name=contributor_name
+                        )
+                        musical.contributors.add(contributor)
 
-            Musical.objects.bulk_create(musicals)
+                # for k, v in matched_data.items():
+                # musical, _ = Musical(contributors=",".join(v[1]), title=v[0], iswc=k)
+                # musicals.append(musical)
+            # Musical.objects.bulk_create(musicals)
 
             self.stdout.write(
                 self.style.SUCCESS(
@@ -76,4 +83,5 @@ def match_data(command, reader):
                 contributors = {i for i in row[1].split("|")}
             # values are made up of a title and a set of contributors
             data[key] = [row[0], contributors]
+        # TODO handle row without iswc
     return data

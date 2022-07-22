@@ -5,6 +5,6 @@ from musicals.serializers import MusicalSerializer
 
 
 class MusicalRetrieveAPIView(generics.RetrieveAPIView):
-    queryset = Musical.objects.all()
+    queryset = Musical.objects.all().prefetch_related()
     serializer_class = MusicalSerializer
     lookup_field = "iswc"
