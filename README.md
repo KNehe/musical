@@ -24,9 +24,21 @@ docker exec -it musicals python manage.py migrate
 
 ## Testing
 
-- Run `python manage.py test`
-
 #### The endpoint
 
 - Visit `http://localhost:8000/api/musicals/T0101974597/` to view a musical picked by it's iswc.
 - You can check `./test_csvs/csv.csv` directory to pick an _iswc_ and test the endpoint.
+
+### Automated tests
+
+- Create a `.env` file in the project root with the folowing details. Change where necessary
+
+```
+POSTGRES_NAME=<database_name>
+POSTGRES_USER=<your_postgres_username>
+POSTGRES_PASSWORD=<your+postgres_user_password>
+DB_HOST=127.0.0.1
+DB_PORT=5432
+```
+
+- Run `python manage.py test`
