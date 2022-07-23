@@ -24,11 +24,11 @@ class Command(BaseCommand):
             raise CommandError("Only csv allowed")
 
         # read file and create musicals
-        musicals = []
+        # musicals = []
         try:
             with open(file=file_path, mode="r") as file:
                 reader = csv.reader(file)
-                # skip columns names
+                # skip column names
                 next(reader)
 
                 self.stdout.write("Matching data...")
@@ -67,21 +67,48 @@ def match_data(command, reader):
             command.stdout.write(command.style.NOTICE(f"Skipping invalid row {row}"))
             continue
 
-        # work on rows with a iswc
+        # HANDLE ROW WITH A ISWC
         if row[2]:
             key = row[2]
             if key in data:
                 # get existing contributors
-                old_set = data[key][1]
+                old_contributors = data[key][1]
                 # get contributors from current row
                 new_contributors = {i for i in row[1].split("|")}
                 # compute union of current row's contributors and existing contributors
-                new_set = old_set | new_contributors
+                union_of_contributors = old_contributors | new_contributors
                 # update contributors
-                data[key][1] = new_set
+                data[key][1] = union_of_contributors
             else:
                 contributors = {i for i in row[1].split("|")}
-            # values are made up of a title and a set of contributors
-            data[key] = [row[0], contributors]
-        # TODO handle row without iswc
+                # values are made up of a list having a title and a set of contributors
+                data[key] = [row[0], contributors]
+
+        # HANDLE ROW WITHOUT ISWC
+        # but it's title and atleast one contributor exists in one of the previous rows
+        # ____________________________________________
+        # this will not work when there's no previous row that has it's title and atleast one contributor
+        # NOTE: this is a solution but a bad one
+        if not row[2]:
+            for key, value in data.items():
+                current_contributors = value[1]
+                current_key = value[0]
+
+                new_contributors = {i for i in row[1].split("|")}
+                new_row_key = row[0]
+
+                if current_key == new_row_key and hasCommonContributor(
+                    new_contributors, current_contributors
+                ):
+                    union_of_contributors = current_contributors | new_contributors
+                    data[key][1] = union_of_contributors
+                    break
+
     return data
+
+
+def hasCommonContributor(new_contributors: set, current_contributors: set) -> bool:
+    for contributor in new_contributors:
+        if contributor in current_contributors:
+            return True
+    return False
